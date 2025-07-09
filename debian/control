@@ -1,9 +1,9 @@
 Source: wb-cc2652p-flasher
-Section: unknown
-Priority: extra
+Section: misc
+Priority: optional
 Maintainer: Wiren Board Team <info@wirenboard.com>
-Build-Depends: debhelper (>= 10)
-Standards-Version: 4.5.0
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.5.1
 Homepage: https://github.com/wirenboard/cc2538-bsl
 
 Package: wb-cc2652p-flasher

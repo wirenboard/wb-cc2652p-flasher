@@ -2,22 +2,80 @@
 
 set -e
 
+# Download latest firmware from GitHub releases
+download_latest_firmware() {
+    local temp_dir="/tmp"
+    local repo_url="https://api.github.com/repos/Koenkk/Z-Stack-firmware/releases/latest"
+    
+    echo "Fetching latest release information..." >&2
+    
+    # Get latest release info and extract download URL for CC1352P2_CC2652P_launchpad_coordinator file
+    local download_url=$(curl -s "$repo_url" | \
+        grep -o '"browser_download_url": "[^"]*CC1352P2_CC2652P_launchpad_coordinator[^"]*\.zip"' | \
+        head -1 | \
+        cut -d'"' -f4)
+    
+    if [[ -z "$download_url" ]]; then
+        echo "Error: Could not find firmware download URL" >&2
+        exit 1
+    fi
+    
+    local filename=$(basename "$download_url")
+    local zip_path="$temp_dir/$filename"
+    
+    echo "Downloading firmware: $filename" >&2
+    curl -L -o "$zip_path" "$download_url"
+    
+    if [[ ! -f "$zip_path" ]]; then
+        echo "Error: Failed to download firmware" >&2
+        exit 1
+    fi
+    
+    # Extract hex file from zip
+    local hex_filename="${filename%.zip}.hex"
+    local hex_path="$temp_dir/$hex_filename"
+    
+    unzip -q "$zip_path" -d "$temp_dir"
+    
+    if [[ ! -f "$hex_path" ]]; then
+        echo "Error: Expected hex file $hex_filename not found in archive" >&2
+        exit 1
+    fi
+    
+    # Clean up zip file
+    rm -f "$zip_path"
+    
+    echo "Firmware extracted to: $hex_path" >&2
+    echo "$hex_path"
+}
+
+# Parse arguments
 if [ "$#" -ne 2 ]; then
     echo "Usage: wb-cc2652p-flasher <module number> <firmware file>"
+    echo "       wb-cc2652p-flasher <module number> -last"
     exit 1
 fi
 
-if [ ! -e "$2" ]; then
-    echo "Firmware file $2 not found"
-    exit 1
+MODULE_NUMBER="$1"
+FIRMWARE_ARG="$2"
+
+# Check if we need to download latest firmware
+if [ "$FIRMWARE_ARG" = "-last" ]; then
+    FIRMWARE_FILE=$(download_latest_firmware)
+else
+    FIRMWARE_FILE="$FIRMWARE_ARG"
+    if [ ! -e "$FIRMWARE_FILE" ]; then
+        echo "Firmware file $FIRMWARE_FILE not found"
+        exit 1
+    fi
 fi
 
 # find platform-dependant MOD# RTS pin number
-RTS_CHIP=$(gpiofind "MOD$1 RTS" | awk '{print $1}')
-RTS_GPIO=$(gpiofind "MOD$1 RTS" | awk '{print $2}')
+RTS_CHIP=$(gpiofind "MOD$MODULE_NUMBER RTS" | awk '{print $1}')
+RTS_GPIO=$(gpiofind "MOD$MODULE_NUMBER RTS" | awk '{print $2}')
 
 if [[ -z "$RTS_GPIO" || -z "$RTS_CHIP" ]]; then
-    echo "Cannot find GPIO RTS for module $1"
+    echo "Cannot find GPIO RTS for module $MODULE_NUMBER"
     exit 1
 fi
 
@@ -28,4 +86,4 @@ sleep 1
 gpioset "$RTS_CHIP" $RTS_GPIO=0
 sleep 1
 
-cc2538-bsl.py -evw -p "/dev/ttyMOD$1" "$2"
+cc2538-bsl.py -evw -p "/dev/ttyMOD$MODULE_NUMBER" "$FIRMWARE_FILE"

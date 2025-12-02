@@ -17,14 +17,14 @@ Example, for module installed in MOD4 slot:
 
 ### 2. With automatic latest firmware download:
 
-`wb-cc2652p-flasher <module number> -last`
+`wb-cc2652p-flasher <module number> -latest`
 
 Example, for module installed in MOD4 slot:
 
-`wb-cc2652p-flasher 4 -last`
+`wb-cc2652p-flasher 4 -latest`
 
 ## Notes
 
 - You need to stop zigbee2mqtt before updating module firmware: `systemctl stop zigbee2mqtt`
 - After flashing, start zigbee2mqtt: `systemctl start zigbee2mqtt`
-- The `-last` option requires internet connection to download firmware from GitHub
+- The `-latest` option requires internet connection to download firmware from GitHub

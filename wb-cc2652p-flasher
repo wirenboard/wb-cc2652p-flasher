@@ -49,7 +49,7 @@ download_latest_firmware() {
 # Parse arguments
 if [ "$#" -ne 2 ]; then
     echo "Usage: wb-cc2652p-flasher <module number> <firmware file>"
-    echo "       wb-cc2652p-flasher <module number> -last"
+    echo "       wb-cc2652p-flasher <module number> -latest"
     exit 1
 fi
 
@@ -57,7 +57,7 @@ MODULE_NUMBER="$1"
 FIRMWARE_ARG="$2"
 
 # Check if we need to download latest firmware
-if [ "$FIRMWARE_ARG" = "-last" ]; then
+if [ "$FIRMWARE_ARG" = "-latest" ]; then
     FIRMWARE_FILE=$(download_latest_firmware)
 else
     FIRMWARE_FILE="$FIRMWARE_ARG"

@@ -4,7 +4,7 @@ set -e
 
 # Download latest firmware from GitHub releases
 download_latest_firmware() {
-    local temp_dir="/tmp"
+    local temp_dir=$(mktemp -d)
     local repo_url="https://api.github.com/repos/Koenkk/Z-Stack-firmware/releases/latest"
     
     echo "Fetching latest release information..." >&2

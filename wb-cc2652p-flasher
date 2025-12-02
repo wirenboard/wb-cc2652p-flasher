@@ -11,10 +11,7 @@ download_latest_firmware() {
     
     # Get latest release info and extract download URL for CC1352P2_CC2652P_launchpad_coordinator file
     local download_url=$(curl -s "$repo_url" | \
-        grep -o '"browser_download_url": "[^"]*CC1352P2_CC2652P_launchpad_coordinator[^"]*\.zip"' | \
-        head -1 | \
-        cut -d'"' -f4)
-    
+        jq -r '.assets[] | select(.browser_download_url | contains("CC1352P2_CC2652P_launchpad_coordinator")) | .browser_download_url')
     if [[ -z "$download_url" ]]; then
         echo "Error: Could not find firmware download URL" >&2
         exit 1

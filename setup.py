@@ -29,7 +29,7 @@ setup(
         },
     install_requires=["pip>=10", "setuptools", "wheel", "pyserial"],
     extras_require={
-        '': ["intelhex"],
+        'default': ["intelhex"],
         'intelhex': ["python-magic"]
     },
     scripts=["cc2538-bsl.py"],

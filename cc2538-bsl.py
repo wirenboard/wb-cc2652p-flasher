@@ -114,8 +114,9 @@ class FirmwareFile(object):
 
         This class will try to guess the file type if python-magic is available.
 
-        If python-magic indicates a plain text file, and if IntelHex is
-        available, then the file will be treated as one of Intel HEX format.
+        If python-magic indicates a plain text or Intel HEX file, and if
+        IntelHex is available, then the file will be treated as one of Intel
+        HEX format.
 
         In all other cases, the file will be treated as a raw binary file.
 
@@ -135,7 +136,9 @@ class FirmwareFile(object):
         if have_magic:
             file_type = magic.from_file(path, mime=True)
 
-            if file_type == 'text/plain':
+            # newer libmagic (e.g. 5.46 in Debian 13) reports Intel Hex as
+            # 'text/x-hex' instead of 'text/plain'
+            if file_type in ('text/plain', 'text/x-hex'):
                 firmware_is_hex = True
                 mdebug(5, "Firmware file: Intel Hex")
             elif file_type == 'application/octet-stream':
